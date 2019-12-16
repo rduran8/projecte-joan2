@@ -6,14 +6,17 @@ import mysql.connector
 import getpass 
 import socket 
 import crypt
-
 #Connexió a la base de dades.
+#try: 
+#    db_connection= MySQLdb.connect("172.24.100.100","proves","Patata01","dbdual") 
+    # If connection is not successful 
+#except: 
+#    print("Can't connect to database")
 try:
-    mydb = mysql.connector.connect(host="172.24.100.100", #3306
-        user="proves",
-        passwd="Patata01*",
-        database='dbdual')
-except mysql.connector.Errorr:
+#    db_connection= MySQLdb.connect 
+#        ("Hostname","dbusername","password","dbname")
+    mydb = mysql.connector.connect(host="172.24.100.100",user="proves",passwd="Patata01*",database='dbdual') 
+except:
     print("Error de la base de dades")
     input("Enter per continuar...")
     
@@ -25,12 +28,11 @@ def connectarBD():
         user="proves",
         passwd="Patata01*",
         database='dbdual')
-    except mysql.connector.Errorr:
+    except mysql.connector.Error:
         print("Error de la base de dades")
-        input("Enter per continuar...")
+        input("Enter per continuar...") 
 
 user = ""
-
 #Mostra el ranking de puntuacions dels grups.
 def ranking():
     os.system('clear')
@@ -44,7 +46,6 @@ def ranking():
          text = llista[x]
          print(str(text[0]) + "\t" + str(text[1]).rjust(9))
     input("Enter per continuar...")
-
 #Comprova si la prova s'ha respost.
 def comprovarProva(grup):
     sql_select_Query = "select * from completat where grup = %s and prova = %s"
@@ -54,7 +55,6 @@ def comprovarProva(grup):
     llista = cursor.fetchall()
     retorn = len(llista)+1
     return retorn;
-
 #Mostra la puntuació del grup.
 def mostrarPuntuacio():
     retorn = ""
@@ -65,28 +65,20 @@ def mostrarPuntuacio():
     retorn = str(z[0])
     retorn = retorn[1:len(retorn) - 2]
     return retorn
-
-#Actualitzar notificacions
-#def socketResposta():
-#    HOST = '127.0.0.1'  # The server's hostname or IP address
-#    PORT = 65432        # The port used by the server
-
-#    try:
+#Actualitzar notificacions def socketResposta():
+#    HOST = '127.0.0.1' # The server's hostname or IP address PORT = 
+#    65432 # The port used by the server try:
 #        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-#            s.connect((HOST, PORT))
-#            s.sendall(b'Hello, world')
-#            data = s.recv(1024)
-#            s.close()
-#    except:
-#        print("No s'ha trobat cap programa de notificaccions en execució.")
-
-#Actualitza la puntuació d'un grup cada vegada que respon correctament a una prova.
+#            s.connect((HOST, PORT)) s.sendall(b'Hello, world') data = 
+#    s.recv(1024) s.close() except:
+#        print("No s'ha trobat cap programa de notificaccions en 
+#execució.") Actualitza la puntuació d'un grup cada vegada que respon 
+#correctament a una prova.
 def actualitzarPuntuacio(grup,prova):
     sql_select_Query = "select puntuacions.puntuacions,puntuacions.idusuaris from puntuacions,usuaris where puntuacions.idusuaris = usuaris.idusuaris and usuaris.usuaris = %s"
     cursor = mydb.cursor()
     cursor.execute(sql_select_Query, (user,))
     z = cursor.fetchall()
-
     cursorcomp = mydb.cursor()
     sql = "INSERT INTO completat (grup, prova,repte) VALUES (%s, %s, %s)"
     val = (user,grup,prova,)
@@ -134,17 +126,16 @@ def actualitzarPuntuacio(grup,prova):
         val = (npuntuacio,id)
         updatec.execute(sqlu,val)
         mydb.commit()
-    #socketResposta() 
-
-#Mostra la següent pregunta del repte a no ser que ja s'hagin mostrat totes.
+    #socketResposta()
+#Mostra la següent pregunta del repte a no ser que ja s'hagin mostrat 
+#totes.
 def seguentPregunta(grup, prova):
     maxproves = contarProves(grup)
     if(prova == maxproves):
         print()
     else:
         prova += 1
-        mostrarPreguntaPantalla(grup, prova)
-
+        mostrarPreguntaPantalla(grup, prova) 
 def comprovarProvaResposta(grup, prova):
     connectarBD()
     sql_select_Query = "select * from completat where grup = %s and prova = %s and repte = %s"
@@ -157,7 +148,6 @@ def comprovarProvaResposta(grup, prova):
     else:
         retorn = "false"
     return retorn
-
         
 #Comprova si el codi entrat es correcte.
 def resposta(grup, prova):
@@ -181,33 +171,22 @@ def resposta(grup, prova):
                 print("La prova ja s'ha respost")
                 input("Prem enter per continuar: ")
                 sortir = "false"
-
 #Retorna la pregunta d'una prova.
 def llegirPregunta(grup,prova):
-    try:
-        retorn = ""
-        sql_select_Query = "select prova from reptes where grup = %s and numprova = %s"
-        cursor = mydb.cursor()
-        cursor.execute(sql_select_Query, (grup,prova))
-        z = cursor.fetchall()
-        retorn = str(z[0])
-        retorn = retorn[2:len(retorn) - 3]
-        return retorn
-    except:
-        return ""
-
+    retorn = ""
+    sql_select_Query = "select prova from reptes where grup = %s and numprova = %s"
+    cursor = mydb.cursor()
+    cursor.execute(sql_select_Query, (grup,prova))
+    z = cursor.fetchall()
+    retorn = str(z[0])
+    retorn = retorn[2:len(retorn) - 3]
+    return retorn
      
-#Retorna la resposta d'una prova.
-#def llegirResposta(grup,prova):
-#    retorn = ""
-#    sql_select_Query = "select resposta from reptes where grup = %s and numprova = %s"
-#    cursor = mydb.cursor()
-#    cursor.execute(sql_select_Query, (grup,prova))
-#    z = cursor.fetchall()
-#    retorn = str(z[0])
-#    retorn = retorn[2:len(retorn) - 3]
-#    return retorn
-
+#Retorna la resposta d'una prova. def llegirResposta(grup,prova):
+#    retorn = "" sql_select_Query = "select resposta from reptes where 
+#grup = %s and numprova = %s" cursor = mydb.cursor() 
+#cursor.execute(sql_select_Query, (grup,prova)) z = cursor.fetchall() 
+#retorn = str(z[0]) retorn = retorn[2:len(retorn) - 3] return retorn 
 #Retorna el codi d'una prova.
 def llegirCodi(grup,prova):
     retorn = ""
@@ -218,29 +197,6 @@ def llegirCodi(grup,prova):
     retorn = str(z[0])
     retorn = retorn[2:len(retorn) - 3]
     return retorn
-
-#Retorna la puntuació d'una prova.
-def llegirPunt(grup,prova):
-    retorn = ""
-    sql_select_Query = "select puntuacio from reptes where grup = %s and numprova = %s"
-    cursor = mydb.cursor()
-    cursor.execute(sql_select_Query, (grup,prova))
-    z = cursor.fetchall()
-    retorn = str(z[0])
-    retorn = retorn[1:len(retorn) - 2]
-    return retorn
-
-#Retorna la descripció d'una prova.
-def llegirDesc(grup):
-    retorn = ""
-    sql_select_Query = "select descripcio from reptes where grup = %s and numprova = 1"
-    cursor = mydb.cursor()
-    cursor.execute(sql_select_Query, (grup,))
-    z = cursor.fetchall()
-    retorn = str(z[0])
-    retorn = retorn[2:len(retorn) - 3]
-    return retorn
-
 #Menú principal d'usuari.
 def menuPrincipal():
     sortir = "true"
@@ -259,9 +215,7 @@ def menuPrincipal():
             elif opcio == 2:
                 ranking()
             elif opcio == 3:
-                borrat = menuAdministrarUsuari()
-                if borrat == True:
-                    sortir="false"
+                menuAdministrarUsuari()
             elif opcio == 10:
                 print("Sortint")
                 sortir = "false"
@@ -273,7 +227,6 @@ def mostrarPreguntaPantalla(grup, pregunta):
     print("**********************************")
     print(llegirPregunta(grup, pregunta))
     resposta(grup, pregunta)
-
 #Menú que llista totes les proves d'un grup i demana triar-ne una.
 def menuProva(grup):
     sortir = "true"
@@ -306,20 +259,19 @@ def menuProva(grup):
             if prova == comprovarProva(grup):
                 mostrarPreguntaPantalla(grup,prova)
             else:
-                print("Ja has respost/encara no pots respondre aquesta prova.")
+                print("Ja has respost aquesta prova.")
                 input("Enter per continuar...")
           
 #Compte el número de proves que hi han.
 def contarProves(grup):
     proves = ""
-    sql_select_Query = "select COUNT(numprova) from reptes where grup = %s"
+    sql_select_Query = "select MAX(numprova) from reptes where grup = %s"
     cursor = mydb.cursor()
     cursor.execute(sql_select_Query, (grup,))
     z = cursor.fetchall()
     proves = str(z[0])
     retorn = int(proves[1:len(proves) - 2])
     return retorn
-
 #Compte el número de reptes (grups) que hi han.
 def contarGrups():
     grups = ""
@@ -330,7 +282,6 @@ def contarGrups():
     grups = str(z[0])
     retorn = int(grups[1:len(grups) - 2])
     return retorn
-
 #Menú de reptes.
 def mostrarMenuGrups():
     sortir = "true"
@@ -353,44 +304,39 @@ def mostrarMenuGrups():
                 print()
                 print("Repte seleccionat incorrecte torna a intentar-ho")
                 input("Enter per continuar...")
-
 #Permet importar reptes a partir d'un csv (llegeix la ruta de l'arxiu).
 def ImportarReptes():
     sortir = "true"
     while sortir == "true":
-        try:
-            ruta = str(input("Entra la ruta del csv (R per tornar): "))
-            #D:\\PRACTIQUES\\DUAL\\reptes.csv
-            #D:\PRACTIQUES\DUAL\reptes_import.csv
-            if ruta.upper() == "R":
-                sortir="false"
-            else:
-                with open(ruta, newline='') as File:
-                    llegir = csv.reader(File)
-                    sql_select_Query = "select max(grup) from reptes"
-                    cursor = mydb.cursor()
-                    cursor.execute(sql_select_Query, ())
-                    z = cursor.fetchall()
-                    grups = str(z[0])
-                    ngrup = int(grups[1:len(grups) - 2])
-                    for row in llegir:
-                        print(row)
-                        g = int(row[0]) + ngrup
-                        r = row[1]
-                        p = row[2]
-                        res = row[3]
-                        punt = row[4]
-                        desc = row[5]
-                        mycursor = mydb.cursor()
-                        sql = "INSERT INTO reptes (grup, numprova,prova,codi,puntuacio,descripcio) VALUES (%s, %s,%s,%s,%s,%s)"
-                        val = (g,r,p,res,punt,desc)
-                        mycursor.execute(sql, val)
-                    mydb.commit()
-                    input("Enter per continuar...")
-                    sortir = "false"
-        except:
-            print("Ruta no vàlida")
-
+        ruta = str(input("Entra la ruta del csv (R per tornar): "))
+        #D:\\PRACTIQUES\\DUAL\\reptes.csv 
+        #D:\PRACTIQUES\DUAL\reptes_import.csv
+        if ruta.upper() == "R":
+            sortir="false"
+        else:
+            with open(ruta, newline='') as File:
+                llegir = csv.reader(File)
+                sql_select_Query = "select max(grup) from reptes"
+                cursor = mydb.cursor()
+                cursor.execute(sql_select_Query, ())
+                z = cursor.fetchall()
+                grups = str(z[0])
+                ngrup = int(grups[1:len(grups) - 2])
+                for row in llegir:
+                    print(row)
+                    g = int(row[0]) + ngrup
+                    r = row[1]
+                    p = row[2]
+                    res = row[3]
+                    punt = row[4]
+                    desc = row[5]
+                    mycursor = mydb.cursor()
+                    sql = "INSERT INTO reptes (grup, numprova,prova,codi,puntuacio,descripcio) VALUES (%s, %s,%s,%s,%s,%s)"
+                    val = (g,r,p,res,punt,desc)
+                    mycursor.execute(sql, val)
+                mydb.commit()
+                input("Enter per continuar...")
+                sortir = "false"
 #Permet crear reptes.
 def CrearReptes():
     sortir2 = "true"
@@ -439,13 +385,23 @@ def modificarPregunta(grup,prova):
             updatec.execute(sqlu,val)
             mydb.commit()
             modificarRepte(grup,prova)
-            sortir = "false"
+            sortir = "true"
         except ValueError:
             os.system('clear')
             print("Valor no vàlid, torna a intentar-ho.")
             input("Enter per continuar...")
-
-#Modificar el codi d'una pregunta.
+#Modificar la resposta d'una pregunta. def 
+#modificarResposta(grup,prova):
+#    sortir = "true" while sortir == "true":
+#        try:
+#            mod = input("Entra la nova resposta: ") updatec = 
+#        mydb.cursor() sqlu = "UPDATE reptes SET resposta = %s WHERE 
+#        grup = %s and numprova = %s" val = (mod,grup,prova) 
+#        updatec.execute(sqlu,val) mydb.commit() sortir = "true" except 
+#        ValueError:
+#            os.system('clear') print("Valor no vàlid, torna a 
+#intentar-ho.") input("Enter per continuar...") Modificar el codi d'una 
+#pregunta.
 def modificarCodi(grup,prova):
     sortir = "true"
     while sortir == "true":
@@ -460,55 +416,15 @@ def modificarCodi(grup,prova):
         except ValueError:
             os.system('clear')
             print("Valor no vàlid, torna a intentar-ho.")
-            input("Enter per continuar...")
-
-#Modificar la descripció d'una pregunta.
-def modificarDesc(grup):
-    sortir = "true"
-    while sortir == "true":
-        try:
-            mod = input(str("Entra la nova descripció: "))
-            updatec = mydb.cursor()
-            sqlu = "UPDATE reptes SET descripcio = %s WHERE grup = %s and numprova = 1"
-            val = (mod,grup)
-            updatec.execute(sqlu,val)
-            mydb.commit()
-            sortir = "false"
-        except ValueError:
-            os.system('clear')
-            print("Valor no vàlid, torna a intentar-ho.")
-            input("Enter per continuar...")
-
-
-#Modificar la puntuació d'una pregunta.
-def modificarPunt(grup,prova):
-    sortir = "true"
-    while sortir == "true":
-        try:
-            mod = input(str("Entra la nova puntuació: "))
-            updatec = mydb.cursor()
-            sqlu = "UPDATE reptes SET puntuacio = %s WHERE grup = %s and numprova = %s"
-            val = (mod,grup,prova)
-            updatec.execute(sqlu,val)
-            mydb.commit()
-            sortir = "false"
-        except ValueError:
-            os.system('clear')
-            print("Valor no vàlid, torna a intentar-ho.")
-            input("Enter per continuar...")
-
+            input("Enter per continuar...") 
 def mostrarRepteAdmin(grup,prova):
     pregunta = llegirPregunta(grup,prova)
     return pregunta
-
 #def mostrarRespostaAdmin(grup,prova):
-#    resposta = llegirResposta(grup,prova)
-#    return resposta
-
+#    resposta = llegirResposta(grup,prova) return resposta
 def mostrarCodiAdmin(grup,prova):
     codi = llegirCodi(grup,prova)
     return codi
-
 #Menú CRUD d'una prova.
 def modificarRepte(grup,prova):
     sortir = "true"
@@ -522,12 +438,10 @@ def modificarRepte(grup,prova):
     print("REPTE: " + str(grup)+ " Descripcio: "+descripcions+" Prova: "+prova)
     while sortir == "true":
         os.system('clear')
-        print("REPTE: " + str(grup)+ " Descripcio: "+descripcions+" Prova: "+prova)
-        print("******************************")
         print("1.Anunciat: " + str(mostrarRepteAdmin(grup,prova)))
         print("2.Resposta: " + str(mostrarCodiAdmin(grup,prova)))
-        print("3.Puntuació: " + str(mostrarPuntAdmin(grup,prova)))
-        print("4.Descripció: " + str(mostrarDescAdmin(grup,prova)))
+        print("3.Puntuació: " + str(mostrarCodiAdmin(grup,prova)))
+        print("4.Descripció: " + str(mostrarCodiAdmin(grup,prova)))
         seleccio = input("Selecciona el que vols modificar (R per sortir): ")
         if seleccio == "r" or seleccio == "R":
             sortir = "false"
@@ -538,44 +452,27 @@ def modificarRepte(grup,prova):
                 modificarPregunta(grup,prova)
             elif seleccio == 2:
                 modificarCodi(grup,prova)
-            elif seleccio == 3:
-                modificarPunt(grup, prova)
             elif seleccio == 4:
-                modificarDesc(grup)
-            else:
                 sortir = "false"
-
 #Retorna la pregunta d'una prova.
 def mostrarRepteAdmin(grup,prova):
     pregunta = llegirPregunta(grup,prova)
     return pregunta
-
-#Retorna la resposta d'una prova.
-#def mostrarRespostaAdmin(grup,prova):
-#    resposta = llegirResposta(grup,prova)
-#    return resposta
-
-#Retorna el codi d'una prova.
+#Retorna la resposta d'una prova. def mostrarRespostaAdmin(grup,prova):
+#    resposta = llegirResposta(grup,prova) return resposta Retorna el 
+#codi d'una prova.
 def mostrarCodiAdmin(grup,prova):
     codi = llegirCodi(grup,prova)
     return codi
-
-def mostrarPuntAdmin(grup,prova):
-    punt = llegirPunt(grup,prova)
-    return punt
-
-def mostrarDescAdmin(grup,prova):
-    desc = llegirDesc(grup)
-    return desc
-
-#Demana si vols borrar la prova del repte seleccionat o si vols tirar enrere.
+#Demana si vols borrar la prova del repte seleccionat o si vols tirar 
+#enrere.
 def borrarRepte(grup,prova):
     sortir = "true"
     while sortir == "true":
         os.system('clear')
         print("Anunciat: " + str(mostrarRepteAdmin(grup,prova)))
         print("Resposta: " + str(mostrarCodiAdmin(grup,prova)))
-        seleccio = input("Vols borrar aquesta pregunta? (S o R per sortir) ")
+        seleccio = input("Vols borrar aquesta pregunta? (S o N o R per sortir) ")
         if seleccio == "r" or seleccio == "R":
             sortir = "false"
         elif seleccio == "s" or seleccio == "S":
@@ -585,7 +482,8 @@ def borrarRepte(grup,prova):
             updatec.execute(sqlu,val)
             mydb.commit()
             sortir = "false"
-
+        else:
+            sortir = "false"
 #Mostra una llista de les proves i demana triar-ne una per borrar-la.
 def borSeleccionarRepte(grup):
     sortir = "true"
@@ -607,8 +505,8 @@ def borSeleccionarRepte(grup):
                 print()
                 print("Repte seleccionat incorrecte torna a intentar-ho")
                 input("Enter per continuar...")
-
-#Demana si vols borrar el repte del grup seleccionat o si vols tirar enrere.
+#Demana si vols borrar el repte del grup seleccionat o si vols tirar 
+#enrere.
 def borrarGrup(grup):
         seleccio = input("Vols esborrar el repte " + str(grup) + " o una pregunta? (S, P o R per sortir) ")
         if seleccio == "r" or seleccio == "R":
@@ -633,17 +531,16 @@ def borrarGrup(grup):
                         print()
                         print("Repte seleccionat incorrecte torna a intentar-ho")
                         input("Enter per continuar...")
-
 #Mostra una llista dels reptes i demana triar-ne un per borrar-lo.
 def borSeleccionarGrup():
     sortir = "true"
     while sortir == "true":
         os.system('clear')
         i = int(contarGrups())
-        print("REPTES:")                                
+        print("REPTES:")
         print("******************************")
         for x in range(1,i + 1):
-            print(str(x) + ". Repte " + str(x))        
+            print(str(x) + ". Repte " + str(x))
         try:
             grup = input("Escull el repte que vols seleccionar (R per sortir): ")
             if grup == "r" or grup == "R":
@@ -658,18 +555,17 @@ def borSeleccionarGrup():
                 input("Enter per continuar...")
         except ValueError:
             os.system('clear')
-            #print("Valor no vàlid, torna a intentar-ho.")
-            #input("Enter per continuar...")
-
+            print("Valor no vàlid, torna a intentar-ho.")
+            input("Enter per continuar...")
 #Afageix una prova.
 def afegirProva(grup):
     os.system('clear')
     pregunta = input("Entra la pregunta: ")
     codi = input("Entra la resposta: ")
     puntuacio = input("Entra la puntuacio: ")
-    sql_select_Query = "select max(numprova) from reptes where grup = %s"
+    sql_select_Query = "select max(numprova) from reptes"
     cursor = mydb.cursor()
-    cursor.execute(sql_select_Query, (grup,))
+    cursor.execute(sql_select_Query, ())
     z = cursor.fetchall()
     prova = str(z[0])
     nprova = int(prova[1:len(prova) - 2])
@@ -678,7 +574,6 @@ def afegirProva(grup):
     val = (grup,nprova+1,pregunta,codi,puntuacio)
     mycursor.execute(sql, val)
     mydb.commit()
-
 #Mostra una llista de les proves i demana triar-ne una.
 def modSeleccionarRepte(grup):
     sortir = "true"
@@ -691,16 +586,11 @@ def modSeleccionarRepte(grup):
         descripcions = str(z[0])
         descripcions = descripcions[2:len(descripcions) - 3]
         os.system('clear')
-        print("REPTE: " + str(grup)+ "  Descripcio: "+descripcions)
+        print("REPTE: " + str(grup)+ " Descripcio: "+descripcions)
         print("******************************")
         nproves = int(nproves)
         for prova in range(1,nproves + 1):
-            preg = mostrarRepteAdmin(grup,prova)
-            if preg=="":
-                preg = mostrarRepteAdmin(grup,prova+1)
-                print(str(prova) + ". Prova " + str(prova)+ " Pregunta: "+ preg)
-            else:
-                print(str(prova) + ". Prova " + str(prova)+ " Pregunta: "+ preg)
+            print(str(prova) + ". Prova " + str(prova)+ " Pregunta: "+ mostrarRepteAdmin(grup,prova))
         try:
             prova = input("Escull la prova que vols seleccionar o C per crear una pregunta nova.(R per sortir): ")
             if prova == "r" or prova == "R":
@@ -713,7 +603,6 @@ def modSeleccionarRepte(grup):
             os.system('clear')
             print("Valor no vàlid, torna a intentar-ho.")
             input("Enter per continuar...")
-
 #Mostra una llista dels Reptes i demana triar-ne un.
 def modSeleccionarGrup():
     sortir = "true"
@@ -729,7 +618,7 @@ def modSeleccionarGrup():
             z = cursor.fetchall()
             descripcions = str(z[0])
             descripcions = descripcions[2:len(descripcions) - 3]
-            print(str(x) + ". Repte " + str(x)+"  Descripcio: "+descripcions)
+            print(str(x) + ". Repte " + str(x)+" Descripcio: "+descripcions)
         grup = int(input("Escull el repte que vols seleccionar (R per sortir): "))
         if grup == "r" or grup == "R":
             sortir = "false"
@@ -757,7 +646,7 @@ def crearUsuari():
             idusuari1 = y[0]
             idusuari = idusuari1[0] + 1
             usuari = input("Entra el nom de l'usuari: ")
-            contrasenya = getpass.getpass("Entra la contrasenya: ")
+            contrasenya = crypt.crypt(getpass.getpass("Entra la contrasenya: "),'patata')
             mycursor = mydb.cursor()
             sql = "INSERT INTO usuaris (idusuaris,usuaris,contrasenya) VALUES (%s,%s, %s)"
             val = (idusuari,usuari,contrasenya)
@@ -768,7 +657,6 @@ def crearUsuari():
         else:
             print("Resposta incorrecte.")
             input("Enter per continuar...")
-
 #Borra un usuari.
 def borrarUsuari():
     sortir = "true"
@@ -796,33 +684,33 @@ def borrarUsuari():
             
 #L'usuari s'esborra a ell mateix.
 def borrarPropiUsuari():
-    sortir="false"
-    while sortir=="false":
-        os.system('clear')
-        passw = input("Entra la contrasenya: ")
-        sql_select_Query = "SELECT contrasenya from usuaris WHERE usuaris = %s and contrasenya = %s"
-        cursor = mydb.cursor()
-        cursor.execute(sql_select_Query, (user,passw))
-        z = cursor.fetchall()
-        if len(z) <= 0:
-            print("Contrasenya incorrecte.")
-            input("Enter per continuar...")
+    os.system('clear')
+    passw = crypt.crypt(getpass.getpass("Entra la contrasenya: "),'patata')
+    sql_select_Query = "SELECT contrasenya from usuaris WHERE usuaris = %s and contrasenya = %s"
+    cursor = mydb.cursor()
+    cursor.execute(sql_select_Query, (user,passw))
+    z = cursor.fetchall()
+    if len(z) <= 0:
+        print("Contrasenya incorrecte.")
+        input("Enter per continuar...")
+    else:
+        print("Contrasenya correcta")
+        preg = input("Estas segur de que vols esborrar l'usuari?(S o N)")
+        if preg == "s" or preg == "S":
+            mycursor = mydb.cursor()
+            sql = "DELETE FROM puntuacions WHERE idusuaris = (select idusuaris from usuaris where usuaris = %s)"
+            val = (user)
+            mycursor.execute(sql, (val,))
+            mydb.commit()
+            mycursor = mydb.cursor()
+            sql = "DELETE FROM usuaris WHERE usuaris = %s"
+            val = (user)
+            mycursor.execute(sql, (val,))
+            mydb.commit()
+            input ("Has esborrat l'usuari")
+            inici()
         else:
-            print("Contrasenya correcta")
-            preg = input("Estas segur de que vols esborrar l'usuari?(S o N)")
-            if preg == "s" or preg == "S":
-                mycursor = mydb.cursor()
-                sql = "DELETE FROM puntuacions WHERE idusuaris = (select idusuaris from usuaris where usuaris = %s)"
-                val = (user)
-                mycursor.execute(sql, (val,))
-                mydb.commit()
-                mycursor = mydb.cursor()
-                sql = "DELETE FROM usuaris WHERE usuaris = %s"
-                val = (user)
-                mycursor.execute(sql, (val,))
-                mydb.commit()
-                input ("Has esborrat l'usuari")
-                return True
+            menuAdministrarUsuari()
             
 #Permet canviar la contrasenya de l'usuari
 def canviContrasenya():
@@ -832,7 +720,7 @@ def canviContrasenya():
             seleccio = input("Vols canviar la contrasenya? (S o qualsevol altre tecla per sortir): ")
             if seleccio == "s" or seleccio == "S":
                 sortir2 = "false"
-                seleccio = getpass.getpass("Entra la contrasenya actual: ")
+                seleccio = crypt.crypt(getpass.getpass("Entra la contrasenya actual: "),'patata')
                 sql_select_Query = "SELECT contrasenya from usuaris WHERE usuaris = %s and contrasenya = %s"
                 cursor = mydb.cursor()
                 cursor.execute(sql_select_Query, (user,seleccio))
@@ -845,8 +733,8 @@ def canviContrasenya():
                     sortir2 = "true"
                     sortir = "false"
                     while sortir == "false":
-                        seleccio = getpass.getpass("Entra la nova contrasenya: ")
-                        seleccio2 = getpass.getpass("Entra la nova contrasenya un altre cop: ")
+                        seleccio = crypt.crypt(getpass.getpass("Entra la nova contrasenya: "),'patata')
+                        seleccio2 = crypt.crypt(getpass.getpass("Entra la nova contrasenya un altre cop: "),'patata')
                         if seleccio == seleccio2:
                             mycursor = mydb.cursor()
                             sql = "UPDATE usuaris SET contrasenya = %s WHERE usuaris = %s"
@@ -872,17 +760,13 @@ def menuAdministrarUsuari():
         if seleccio == "R" or seleccio == "r":
             sortir = "true"
         elif seleccio == "1":
-            borrat = borrarPropiUsuari()
-            if borrat == True:
-                return True
+            borrarPropiUsuari()
         elif seleccio == "2":
             canviContrasenya()
         else:
             os.system('clear')
             print("Opció no vàlida, torna a intentar-ho.")
             input("Enter per continuar...")
-
-
 #Comprova si l'usuari existeix.
 def comprovarUser(usuari):
     retorn = "false"
@@ -893,7 +777,6 @@ def comprovarUser(usuari):
     if len(z) <= 0:
         retorn = "true"
     return retorn
-
 #Menú que permet modificar l'usuari i la contrasenya d'un usuari.
 def menModUsuari(usuari):
     os.system('clear')
@@ -921,7 +804,7 @@ def menModUsuari(usuari):
                     updatec.execute(sqlu,val)
                     mydb.commit()
                 elif opcio == 2:
-                    mod = getpass.getpass("Entra la contrasenya: ")
+                    mod = crypt.crypt(getpass.getpass("Entra la contrasenya: "),'patata')
                     updatec = mydb.cursor()
                     sqlu = "UPDATE usuaris SET contrasenya = %s WHERE idusuaris = %s"
                     val = (mod,idusuari)
@@ -938,7 +821,6 @@ def menModUsuari(usuari):
             os.system('clear')
             print("Valor no vàlid, torna a intentar-ho.")
             input("Enter per continuar...")
-
 #Modificar usuari.
 def modificarUsuari():
     sortir = "true"
@@ -955,7 +837,6 @@ def modificarUsuari():
                 input("Enter per continuar...")
         else:
             sortir = "false"
-
 #Menú CRUD usuaris.
 def usuaris():
     sortir = "true"
@@ -988,7 +869,6 @@ def usuaris():
             os.system('clear')
             print("Valor no vàlid, torna a intentar-ho.")
             input("Enter per continuar...")
-
 #Llista tots els usuaris registrats a la base de dades.
 def llistarUsuaris():
     mycursor = mydb.cursor()
@@ -998,7 +878,6 @@ def llistarUsuaris():
     print("Usuaris\tContrasenya\n*******************")
     for row in z:
         print(row[0]+"\t"+row[1].rjust(11))
-
 #Menú admin
 def menuAdmin():
     sortir = "true"
@@ -1042,13 +921,12 @@ def menuAdmin():
                 input("Enter per continuar...")
         except ValueError:
             os.system('clear')
-            #print("Valor no vàlid, torna a intentar-ho.")
-            #input("Enter per contunuar...")
-
-#Comprova si l'usuari es admin o no, i redirecciona al seu respectiu menú.
+            #print("Valor no vàlid, torna a intentar-ho.") input("Enter per contunuar...")
+#Comprova si l'usuari es admin o no, i redirecciona al seu respectiu 
+#menú.
 def adminUser(nom,contrasenya):
     if nom == "admin":
-        if  contrasenya == crypt.crypt("admin",'patata'):
+        if contrasenya == "admin":
                 global user
                 user = nom
                 menuAdmin()
@@ -1079,18 +957,14 @@ def compUser(nom,contrasenya):
         user = nom
         comp = "true"
     return comp
-
 #Loggin
 def loging():
     os.system('clear')
     nom = str(input("Entra l'usuari : "))
     #No és mostra la contrasenya si obres el programa amb python.
-    contrasenya = getpass.getpass("Entra la contrasenya: ")
-    print(contrasenya)
-    #print(crypt.crypt(contrasenya,'salt'))
+    contrasenya = crypt.crypt(getpass.getpass("Entra la contrasenya: "),'patata')
     os.system('clear')
     adminUser(nom,contrasenya)
-
 #Crear usuari
 def crearUser():
     sortir = "true"
@@ -1112,8 +986,8 @@ def crearUser():
             cursor.execute(sql_select_Query, (usuari,))
             z = cursor.fetchall()
             if len(z) <= 0:
-                contrasenya = getpass.getpass("Entra la contrasenya: ")
-                contrasenya2 = getpass.getpass("Entra la contrasenya un altre cop: ")
+                contrasenya = crypt.crypt(getpass.getpass("Entra la contrasenya: "),'patata')
+                contrasenya2 = crypt.crypt(getpass.getpass("Entra la contrasenya un altre cop: "),'patata')
                 if contrasenya == contrasenya2:
                     mycursor = mydb.cursor()
                     sql = "INSERT INTO usuaris (idusuaris,usuaris,contrasenya) VALUES (%s,%s, %s)"
@@ -1129,7 +1003,6 @@ def crearUser():
             else:
                 print("L'usuari ja existeix.")
                 input("Enter per continuar...")
-
 #Menú inici
 def inici():
     sortir = "true"
@@ -1157,4 +1030,3 @@ def inici():
             input("Enter per continuar...")
     
 inici()
-
