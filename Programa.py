@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # python3
 # -*- coding: utf-8 -*-
 import csv 
@@ -8,10 +9,10 @@ import socket
 import crypt
 #Connexió a la base de dades.
 try:
-    mydb = mysql.connector.connect(host="172.24.100.100", #3306
-        user="proves",
-        passwd="Patata01*",
-        database='dbdual')
+    mydb = mysql.connector.connect(host="172.24.10.1", #3306
+        user="grup2",
+        passwd="patata",
+        database='dualRogerJordiDavid')
 except mysql.connector.Error:
     print("Error de la base de dades")
     input("Enter per continuar...")
@@ -20,10 +21,10 @@ def connectarBD():
     global mydb
     mydb.close()
     try:
-        mydb = mysql.connector.connect(host="172.24.100.100", #3306
-        user="proves",
-        passwd="Patata01*",
-        database='dbdual')
+        mydb = mysql.connector.connect(host="172.24.10.1", #3306
+        user="grup2",
+        passwd="patata",
+        database='dualRogerJordiDavid')
     except mysql.connector.Error:
         print("Error de la base de dades")
         input("Enter per continuar...")
@@ -31,6 +32,7 @@ def connectarBD():
 user = ""
 #Mostra el ranking de puntuacions dels grups.
 def ranking():
+    connectarBD()
     os.system('clear')
     retorn = ""
     sql_select_Query = "select usuaris.usuaris,puntuacions.puntuacions from puntuacions,usuaris where puntuacions.idusuaris = usuaris.idusuaris"
@@ -346,8 +348,11 @@ def ImportarReptes():
                     cursor = mydb.cursor()
                     cursor.execute(sql_select_Query, ())
                     z = cursor.fetchall()
-                    grups = str(z[0])
-                    ngrup = int(grups[1:len(grups) - 2])
+                    if len(z) == 0:
+                        ngrup=0
+                    else:
+                        grups = str(z[0])
+                        ngrup = int(grups[1:len(grups) - 2])
                     for row in llegir:
                         print(row)
                         g = int(row[0]) + ngrup
